@@ -26,9 +26,13 @@ class Survey
     #[ORM\OneToMany(mappedBy: 'survey', targetEntity: Question::class, orphanRemoval: true)]
     private Collection $questions;
 
+    #[ORM\OneToMany(mappedBy: 'survey', targetEntity: SurveyResponse::class, orphanRemoval: true)]
+    private Collection $surveyResponses;
+
     public function __construct()
     {
         $this->questions = new ArrayCollection();
+        $this->surveyResponses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -84,6 +88,36 @@ class Survey
             // set the owning side to null (unless already changed)
             if ($question->getSurvey() === $this) {
                 $question->setSurvey(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SurveyResponse>
+     */
+    public function getSurveyResponses(): Collection
+    {
+        return $this->surveyResponses;
+    }
+
+    public function addSurveyResponse(SurveyResponse $surveyResponse): static
+    {
+        if (!$this->surveyResponses->contains($surveyResponse)) {
+            $this->surveyResponses->add($surveyResponse);
+            $surveyResponse->setSurvey($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSurveyResponse(SurveyResponse $surveyResponse): static
+    {
+        if ($this->surveyResponses->removeElement($surveyResponse)) {
+            // set the owning side to null (unless already changed)
+            if ($surveyResponse->getSurvey() === $this) {
+                $surveyResponse->setSurvey(null);
             }
         }
 
