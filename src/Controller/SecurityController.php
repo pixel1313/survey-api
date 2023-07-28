@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class SecurityController extends AbstractController
 {
-    #[Route('/route', name: 'app_login', methods: ['POST'])]
+    #[Route('/login', name: 'app_login', methods: ['POST'])]
     public function login(IriConverterInterface $iriConverter, #[CurrentUser] $user = null): Response
     {
         if(!$user) {

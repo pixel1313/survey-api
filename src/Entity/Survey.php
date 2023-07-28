@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SurveyRepository::class)]
 #[ApiResource(
@@ -44,6 +45,12 @@ class Survey
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        maxMessage: "Name your survey in 255 characters or less"
+    )]
     #[Groups(['survey:read', 'survey:write'])]
     private ?string $name = null;
 
@@ -61,6 +68,7 @@ class Survey
 
     #[ORM\ManyToOne(inversedBy: 'surveys')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\Valid]
     #[Groups(['survey:read', 'survey:write'])]
     private ?User $owner = null;
 
