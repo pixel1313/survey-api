@@ -26,16 +26,17 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             security: 'is_granted("ROLE_SURVEY_CREATE")',
         ),
-        new Put(
-            security: 'is_granted("ROLE_SURVEY_EDIT")',
-        ),
         new Patch(
-            security: 'is_granted("ROLE_SURVEY_EDIT")',
+            security: 'is_granted("ROLE_SURVEY_EDIT") and object.getOwner() == user',
+            securityPostDenormalize: 'object.getOwner() == user',
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN")',
         ),
-    ]
+    ],
+    extraProperties: [
+        'standard_put' => true,
+    ],
 )]
 class Survey
 {
