@@ -50,6 +50,7 @@ final class SurveyFactory extends ModelFactory
             'isPublished' => self::faker()->boolean(),
             'name' => self::faker()->text(255),
             'questions' => [],
+            'owner' => UserFactory::new(),
         ];
     }
 

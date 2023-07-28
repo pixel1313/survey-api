@@ -163,4 +163,24 @@ class SurveyResourceTest extends ApiTestCase
             ->assertStatus(403)
         ;
     }
+
+    public function testAdminCanPatchToEditSurvey(): void
+    {
+        $admin = UserFactory::new()->asAdmin()->create();
+        $survey = SurveyFactory::createOne();
+
+        $this->browser()
+            ->actingAs($admin)
+            ->patch('/api/surveys/' . $survey->getId(), [
+                'json' => [
+                    'name' => 'Admin rename',
+                ],
+                'headers' => [
+                    'Content-Type' => "application/merge-patch+json",
+                ]
+            ])
+            ->assertStatus(200)
+            ->assertJsonMatches('name', 'Admin rename')
+        ;
+    }
 }
