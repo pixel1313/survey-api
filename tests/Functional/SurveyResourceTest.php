@@ -42,7 +42,7 @@ class SurveyResourceTest extends ApiTestCase
             '@id',
             '@type',
             'name',
-            'isPublished',
+            //'isPublished',
             'questions',
             'surveyResponses',
             'owner',
@@ -167,7 +167,9 @@ class SurveyResourceTest extends ApiTestCase
     public function testAdminCanPatchToEditSurvey(): void
     {
         $admin = UserFactory::new()->asAdmin()->create();
-        $survey = SurveyFactory::createOne();
+        $survey = SurveyFactory::createOne([
+            'isPublished' => false,
+        ]);
 
         $this->browser()
             ->actingAs($admin)
@@ -181,6 +183,31 @@ class SurveyResourceTest extends ApiTestCase
             ])
             ->assertStatus(200)
             ->assertJsonMatches('name', 'Admin rename')
+            ->assertJsonMatches('isPublished', false)
+        ;
+    }
+
+    public function testOwnerCanSeeIsPublishedField(): void
+    {
+        $user = UserFactory::new()->create();
+        $survey = SurveyFactory::createOne([
+            'isPublished' => false,
+            'owner' => $user,
+        ]);
+
+        $this->browser()
+            ->actingAs($user)
+            ->patch('/api/surveys/' . $survey->getId(), [
+                'json' => [
+                    'name' => 'new name',
+                ],
+                'headers' => [
+                    'Content-Type' => "application/merge-patch+json",
+                ]
+            ])
+            ->assertStatus(200)
+            ->assertJsonMatches('name', 'new name')
+            ->assertJsonMatches('isPublished', false)
         ;
     }
 }

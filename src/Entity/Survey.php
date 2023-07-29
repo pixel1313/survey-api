@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -27,8 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: 'is_granted("ROLE_SURVEY_CREATE")',
         ),
         new Patch(
-            security: 'is_granted("ROLE_ADMIN") or (is_granted("ROLE_SURVEY_EDIT") and object.getOwner() == user)',
-            securityPostDenormalize: 'is_granted("ROLE_ADMIN") or object.getOwner() == user',
+            security: 'is_granted("EDIT", object)',
+            securityPostDenormalize: 'is_granted("EDIT", object)',
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN")',
@@ -57,7 +58,8 @@ class Survey
 
     #[ORM\Column]
     #[Groups(['survey:read', 'survey:write'])]
-    private ?bool $isPublished = null;
+    #[ApiProperty(security: 'is_granted("EDIT", object)')]
+    private ?bool $isPublished = false;
 
     #[ORM\OneToMany(mappedBy: 'survey', targetEntity: Question::class, orphanRemoval: true)]
     #[Groups(['survey:read', 'survey:write'])]
