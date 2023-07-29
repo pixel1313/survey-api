@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Repository\SurveyRepository;
+use App\Validator\IsValidOwner;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,7 +30,6 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Patch(
             security: 'is_granted("EDIT", object)',
-            securityPostDenormalize: 'is_granted("EDIT", object)',
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN")',
@@ -57,8 +57,7 @@ class Survey
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(['survey:read', 'survey:write'])]
-    #[ApiProperty(security: 'is_granted("EDIT", object)')]
+    #[Groups(['admin:read', 'admin:write', 'owner:read'])]
     private ?bool $isPublished = false;
 
     #[ORM\OneToMany(mappedBy: 'survey', targetEntity: Question::class, orphanRemoval: true)]
@@ -72,6 +71,8 @@ class Survey
     #[ORM\ManyToOne(inversedBy: 'surveys')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\Valid]
+    #[IsValidOwner]
+    #[Assert\NotNull]
     #[Groups(['survey:read', 'survey:write'])]
     private ?User $owner = null;
 

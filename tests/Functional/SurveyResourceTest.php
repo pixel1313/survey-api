@@ -158,7 +158,7 @@ class SurveyResourceTest extends ApiTestCase
                     'Content-Type' => "application/merge-patch+json",
                 ]
             ])
-            ->assertStatus(403)
+            ->assertStatus(422)
         ;
     }
 
