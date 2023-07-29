@@ -130,7 +130,6 @@ class SurveyResourceTest extends ApiTestCase
                     'Content-Type' => "application/merge-patch+json",
                 ]
             ])
-            ->dump()
             ->assertStatus(200)
             ->assertJsonMatches('name', 'A different Name')
         ;
@@ -159,7 +158,6 @@ class SurveyResourceTest extends ApiTestCase
                     'Content-Type' => "application/merge-patch+json",
                 ]
             ])
-            ->dump()
             ->assertStatus(403)
         ;
     }
