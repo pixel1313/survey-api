@@ -2,6 +2,7 @@
 
 namespace App\Normalizer;
 
+use App\Entity\Survey;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
