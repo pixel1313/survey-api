@@ -69,7 +69,7 @@ class SurveyResourceTest extends ApiTestCase
                 'json' => [
                     'name' => 'Testing Survey',
                     'isPublished' => true,
-                    'owner' => 'api/users/' . $user->getId(),
+                    //'owner' => 'api/users/' . $user->getId(),
                 ],
             ])
             ->assertStatus(201)

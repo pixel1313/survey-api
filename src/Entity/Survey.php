@@ -72,7 +72,6 @@ class Survey
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\Valid]
     #[IsValidOwner]
-    #[Assert\NotNull]
     #[Groups(['survey:read', 'survey:write'])]
     private ?User $owner = null;
 
