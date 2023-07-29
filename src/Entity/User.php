@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Repository\UserRepository;
+use App\Validator\SurveysAllowedOwnerChange;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -80,6 +81,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Survey::class)]
     #[Groups(['user:read', 'user:write'])]
+    #[SurveysAllowedOwnerChange]
     private Collection $surveys;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: SurveyResponse::class)]

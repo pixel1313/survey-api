@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional;
 
+use App\Factory\SurveyFactory;
 use App\Factory\UserFactory;
 use App\Tests\Functional\ApiTestCase;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -46,6 +47,27 @@ class UserResourceTest extends ApiTestCase
                 ]
             ])
             ->assertStatus(200)
+        ;
+    }
+
+    public function testSurveysCannotBeStolen(): void
+    {
+        $user = UserFactory::createOne();
+        $otherUser = UserFactory::createOne();
+        $survey = SurveyFactory::createOne(['owner' => $otherUser]);
+
+        $this->browser()
+            ->actingAs($user)
+            ->patch('/api/users/' . $user->getId(), [
+                'json' => [
+                    'username' => 'changed',
+                    'surveys' => [
+                        '/api/surveys/' . $survey->getId(),
+                    ],
+                ],
+                'headers' => ['Content-Type' => 'application/merge-patch+json']
+            ])
+            ->assertStatus(422)
         ;
     }
 }
