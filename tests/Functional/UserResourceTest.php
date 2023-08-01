@@ -70,4 +70,19 @@ class UserResourceTest extends ApiTestCase
             ->assertStatus(422)
         ;
     }
+
+    public function testUnpublishedSurveysNotReturned(): void
+    {
+        $user = UserFactory::createOne();
+        SurveyFactory::createOne([
+            'isPublished' => false,
+            'owner' => $user,
+        ]);
+
+        $this->browser()
+            ->actingAs(UserFactory::createOne())
+            ->get('/api/users/' . $user->getId())
+            ->assertJsonMatches('length("surveys")', 0)
+        ;
+    }
 }

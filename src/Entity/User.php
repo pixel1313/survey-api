@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
+use App\Repository\SurveyRepository;
 use App\Repository\UserRepository;
 use App\Validator\SurveysAllowedOwnerChange;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -80,7 +80,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Survey::class)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:write'])]
     #[SurveysAllowedOwnerChange]
     private Collection $surveys;
 
@@ -193,6 +193,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getSurveys(): Collection
     {
         return $this->surveys;
+    }
+
+    #[Groups(['user:read'])]
+    #[SerializedName('surveys')]
+    public function getPublishedSurveys(): Collection
+    {
+        return $this->surveys->matching(SurveyRepository::createPublishedCriteria());
     }
 
     public function addSurvey(Survey $survey): static
