@@ -18,9 +18,15 @@ class SurveyResourceTest extends ApiTestCase
     {
         UserFactory::createOne();
         
-        SurveyFactory::createMany(5, function() {
-            return ['owner' => UserFactory::random()];
-        });
+        SurveyFactory::createMany(5, [
+            'owner' => UserFactory::random(),
+            'isPublished' => true
+        ]);
+
+        SurveyFactory::createOne([
+            'owner' => UserFactory::random(),
+            'isPublished' => false,
+        ]);
 
         ChoiceQuestionFactory::createMany(10, function() {
             return ['survey' => SurveyFactory::random()];
@@ -49,6 +55,17 @@ class SurveyResourceTest extends ApiTestCase
         ]);
     }
 
+    public function testGetOneUnpublishedSurvey404s(): void
+    {
+        $survey = SurveyFactory::createOne([
+            'isPublished' => false,
+        ]);
+
+        $this->browser()
+            ->get('/api/surveys/' . $survey->getId())
+            ->assertStatus(404);
+    }
+
     public function testPostToCreateSurvey(): void
     {
         $user = UserFactory::createOne(['password' => 'pass']);
@@ -69,7 +86,6 @@ class SurveyResourceTest extends ApiTestCase
                 'json' => [
                     'name' => 'Testing Survey',
                     'isPublished' => true,
-                    //'owner' => 'api/users/' . $user->getId(),
                 ],
             ])
             ->assertStatus(201)
@@ -162,11 +178,34 @@ class SurveyResourceTest extends ApiTestCase
         ;
     }
 
+    public function testPatchUnpublishedWorks()
+    {
+        $user = UserFactory::createOne();
+        $survey = SurveyFactory::createOne([
+            'owner' => $user,
+            'isPublished' => false,
+        ]);
+
+        $this->browser()
+            ->actingAs($user)
+            ->patch('/api/surveys/' . $survey->getId(), [
+                'json' => [
+                    'name' => 'A different Name',
+                ],
+                'headers' => [
+                    'Content-Type' => "application/merge-patch+json",
+                ]
+            ])
+            ->assertStatus(200)
+            ->assertJsonMatches('name', 'A different Name')
+        ;
+    }
+
     public function testAdminCanPatchToEditSurvey(): void
     {
         $admin = UserFactory::new()->asAdmin()->create();
         $survey = SurveyFactory::createOne([
-            'isPublished' => false,
+            'isPublished' => true,
         ]);
 
         $this->browser()
@@ -181,7 +220,7 @@ class SurveyResourceTest extends ApiTestCase
             ])
             ->assertStatus(200)
             ->assertJsonMatches('name', 'Admin rename')
-            ->assertJsonMatches('isPublished', false)
+            ->assertJsonMatches('isPublished', true)
         ;
     }
 
@@ -189,7 +228,7 @@ class SurveyResourceTest extends ApiTestCase
     {
         $user = UserFactory::new()->create();
         $survey = SurveyFactory::createOne([
-            'isPublished' => false,
+            'isPublished' => true,
             'owner' => $user,
         ]);
 
@@ -205,7 +244,7 @@ class SurveyResourceTest extends ApiTestCase
             ])
             ->assertStatus(200)
             ->assertJsonMatches('name', 'new name')
-            ->assertJsonMatches('isPublished', false)
+            ->assertJsonMatches('isPublished', true)
         ;
     }
 }

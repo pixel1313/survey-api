@@ -47,7 +47,7 @@ final class SurveyFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
-            'isPublished' => self::faker()->boolean(),
+            'isPublished' => true,
             'name' => self::faker()->text(255),
             'questions' => [],
             'owner' => UserFactory::new(),

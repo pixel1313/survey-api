@@ -20,6 +20,7 @@ class AppFixtures extends Fixture
         SurveyFactory::createMany(20, function() {
             return [
                 'owner' => UserFactory::random(),
+                'isPublished' => rand(0, 10) > 3,
             ];
         });
 
