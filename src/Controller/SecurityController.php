@@ -3,14 +3,18 @@
 namespace App\Controller;
 
 use ApiPlatform\Api\IriConverterInterface;
-use phpDocumentor\Reflection\Types\Void_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class SecurityController extends AbstractController
 {
+    public function __construct(private SerializerInterface $serializer) {
+
+    }
+
     #[Route('/login', name: 'app_login', methods: ['POST'])]
     public function login(IriConverterInterface $iriConverter, #[CurrentUser] $user = null): Response
     {
@@ -20,7 +24,7 @@ class SecurityController extends AbstractController
             ], 401);
         }
 
-        return new Response(null, 204, [
+        return new Response($this->serializer->serialize($user, 'json', [ 'groups' => 'user:login']), 200, [
             'Location' => $iriConverter->getIriFromResource($user),
         ]);
     }
