@@ -91,6 +91,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'ownedBy', targetEntity: ApiToken::class)]
     private Collection $apiTokens;
 
+    #[Groups(['user:login'])]
+    private ?string $token = null;
+
     public function __construct()
     {
         $this->surveys = new ArrayCollection();
@@ -282,6 +285,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * used for login only.
+     */
+    public function setToken(string $token)
+    {
+        $this->token = $token;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
     }
 
     /**
