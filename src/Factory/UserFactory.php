@@ -4,6 +4,7 @@ namespace App\Factory;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Security\Voter\SurveyVoter;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
@@ -53,7 +54,9 @@ final class UserFactory extends ModelFactory
         return [
             'email' => self::faker()->email(),
             'password' => 'password',
-            'roles' => [],
+            'roles' => [
+                SurveyVoter::VIEW,
+            ],
             'username' => self::faker()->userName(),
         ];
     }
