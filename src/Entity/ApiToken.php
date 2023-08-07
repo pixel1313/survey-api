@@ -11,6 +11,7 @@ class ApiToken
     private const PERSONAL_ACCESS_TOKEN_PREFIX = 'tcp_';
 
     public const SCOPE_USER_EDIT = 'ROLE_USER_EDIT';
+    public const SCOPE_SURVEY_VIEW = 'ROLE_SURVEY_VIEW';
     public const SCOPE_SURVEY_CREATE = 'ROLE_SURVEY_CREATE';
     public const SCOPE_SURVEY_EDIT = 'ROLE_SURVEY_EDIT';
 
