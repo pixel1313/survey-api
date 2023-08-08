@@ -44,8 +44,6 @@ class SecurityController extends AbstractController
             'token' => $apiToken->getToken(),
         ], 200, [ 'Location' => $iriConverter->getIriFromResource($user)]);
         */
-
-        dump($user);
         
         return new Response($this->serializer->serialize($user, 'json', [ 'groups' => 'user:login']), 200, [
             'Location' => $iriConverter->getIriFromResource($user),
