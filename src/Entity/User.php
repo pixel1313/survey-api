@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SurveyRepository;
 use App\Repository\UserRepository;
+use App\State\UserHashPasswordProcessor;
 use App\Validator\SurveysAllowedOwnerChange;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -31,7 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(),
         new Post(
             security: 'is_granted("PUBLIC_ACCESS")',
-            validationContext: ['groups' => ['Default', 'postValidation']]
+            validationContext: ['groups' => ['Default', 'postValidation']],
+            processor: UserHashPasswordProcessor::class,
         ),
         new Patch(
             security: 'is_granted("ROLE_USER_EDIT")',

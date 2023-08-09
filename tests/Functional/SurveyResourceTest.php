@@ -14,9 +14,17 @@ class SurveyResourceTest extends ApiTestCase
 {
     use ResetDatabase;
 
+    /**
+     * Summary of testGetCollectionOfSurveys
+     * @return void
+     * 
+     * @group GET
+     * @group SurveyCollection
+     * @group json
+     */
     public function testGetCollectionOfSurveys(): void
     {
-        UserFactory::createOne();
+        $user = UserFactory::createOne();
         
         SurveyFactory::createMany(5, [
             'owner' => UserFactory::random(),
@@ -37,20 +45,20 @@ class SurveyResourceTest extends ApiTestCase
         });
 
         $json = $this->browser()
+            ->actingAs($user)
             ->get('api/surveys')
             ->assertJson()
-            ->assertJsonMatches('"hydra:totalItems"', 5)
-            ->assertJsonMatches('length("hydra:member")', 5)
+            ->assertJsonMatches('"hydra:totalItems"', 6)
+            ->assertJsonMatches('length("hydra:member")', 6)
             ->json()
         ;
 
         $json->assertMatches('keys("hydra:member"[0])', [
             '@id',
             '@type',
+            'id',
             'name',
-            //'isPublished',
-            'questions',
-            'surveyResponses',
+            'isPublished',
             'owner',
         ]);
     }
@@ -77,7 +85,7 @@ class SurveyResourceTest extends ApiTestCase
                     'password' => 'pass',
                 ],
             ])
-            ->assertStatus(204)
+            ->assertStatus(200)
             ->post('/api/surveys', [
                 'json' => [],
             ])
@@ -161,6 +169,7 @@ class SurveyResourceTest extends ApiTestCase
                     'Content-Type' => "application/merge-patch+json",
                 ]
             ])
+            ->dump()
             ->assertStatus(403)
         ;
         

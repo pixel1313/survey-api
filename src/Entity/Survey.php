@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SurveyRepository;
+use App\State\SurveyOwnerProcessor;
 use App\Validator\IsValidOwner;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -23,12 +24,15 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new Get(
             security: 'is_granted("ROLE_SURVEY_VIEW")',
+            normalizationContext: ['groups' => ['survey:read', 'survey:item:get']],
         ),
         new GetCollection(
             security: 'is_granted("ROLE_SURVEY_VIEW")',
+            normalizationContext: ['groups' => ['survey:read']]
         ),
         new Post(
             security: 'is_granted("ROLE_SURVEY_CREATE")',
+            processor: SurveyOwnerProcessor::class,
         ),
         new Patch(
             security: 'is_granted("ROLE_SURVEY_EDIT")',
@@ -64,11 +68,11 @@ class Survey
     private ?bool $isPublished = false;
 
     #[ORM\OneToMany(mappedBy: 'survey', targetEntity: Question::class, orphanRemoval: true)]
-    #[Groups(['survey:read', 'survey:write'])]
+    #[Groups(['survey:item:get', 'survey:write'])]
     private Collection $questions;
 
     #[ORM\OneToMany(mappedBy: 'survey', targetEntity: SurveyResponse::class, orphanRemoval: true)]
-    #[Groups(['survey:read', 'survey:write'])]
+    #[Groups(['survey:item:get', 'survey:write'])]
     private Collection $surveyResponses;
 
     #[ORM\ManyToOne(inversedBy: 'surveys')]
