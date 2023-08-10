@@ -167,4 +167,6 @@ class Book
 Serialization Dynamic Context
 -----------------------------
 
-TODO: pull relevant information from [This Link](https://api-platform.com/docs/core/serialization/#changing-the-serialization-context-dynamically).
+TODO: pull relevant information from
+[This api-platform Link](https://api-platform.com/docs/core/serialization/#changing-the-serialization-context-dynamically) and
+[This symconycasts Link](https://symfonycasts.com/screencast/api-platform-security/context-builder#codeblock-549590dd51)
