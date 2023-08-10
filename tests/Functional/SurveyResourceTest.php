@@ -8,8 +8,16 @@ use App\Factory\ChoiceQuestionFactory;
 use App\Factory\ResponseQuestionFactory;
 use App\Factory\SurveyFactory;
 use App\Factory\UserFactory;
+use App\Tests\Component\SurveyComponent;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
+/**
+ * Summary of SurveyResourceTest
+ * 
+ * @todo extract additional Content-Type information to the ApiTestClass.
+ * 
+ * @group Survey
+ */
 class SurveyResourceTest extends ApiTestCase
 {
     use ResetDatabase;
@@ -27,12 +35,12 @@ class SurveyResourceTest extends ApiTestCase
         $user = UserFactory::createOne();
         
         SurveyFactory::createMany(5, [
-            'owner' => UserFactory::random(),
+            'owner' => $user,
             'isPublished' => true
         ]);
 
         SurveyFactory::createOne([
-            'owner' => UserFactory::random(),
+            'owner' => $user,
             'isPublished' => false,
         ]);
 
@@ -44,25 +52,23 @@ class SurveyResourceTest extends ApiTestCase
             return ['survey' => SurveyFactory::random()];
         });
 
-        $json = $this->browser()
+        $this->browser()
             ->actingAs($user)
             ->get('api/surveys')
-            ->assertJson()
-            ->assertJsonMatches('"hydra:totalItems"', 6)
-            ->assertJsonMatches('length("hydra:member")', 6)
-            ->json()
+            ->use(function (SurveyComponent $surveyComponent) {
+                $surveyComponent->assertCorrectHydraCollectionFormat(6);
+            })
+            ->assertJson();
         ;
-
-        $json->assertMatches('keys("hydra:member"[0])', [
-            '@id',
-            '@type',
-            'id',
-            'name',
-            'isPublished',
-            'owner',
-        ]);
     }
 
+    /**
+     * Summary of testGetOneUnpublishedSurvey404s
+     * @return void
+     * 
+     * @group GET
+     * @group Errors
+     */
     public function testGetOneUnpublishedSurvey404s(): void
     {
         $survey = SurveyFactory::createOne([
@@ -74,6 +80,13 @@ class SurveyResourceTest extends ApiTestCase
             ->assertStatus(404);
     }
 
+    /**
+     * Summary of testPostToCreateSurvey
+     * @return void
+     * 
+     * @group POST
+     * @group Security
+     */
     public function testPostToCreateSurvey(): void
     {
         $user = UserFactory::createOne(['password' => 'pass']);
@@ -101,6 +114,13 @@ class SurveyResourceTest extends ApiTestCase
         ;
     }
 
+    /**
+     * Summary of testPostToCreateSurveyWithApiKey
+     * @return void
+     * 
+     * @group POST
+     * @group Security
+     */
     public function testPostToCreateSurveyWithApiKey(): void
     {
         $token = ApiTokenFactory::createOne([
@@ -108,16 +128,20 @@ class SurveyResourceTest extends ApiTestCase
         ]);
 
         $this->browser()
-            ->post('/api/surveys', [
-                'json' => [],
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $token->getToken(),
-                ],
-            ])
+            ->use(function (SurveyComponent $surveyComponent) use ($token) {
+                $surveyComponent->postWithToken([], $token->getToken());
+            })
             ->assertStatus(422)
         ;
     }
 
+    /**
+     * Summary of testPostToCreateSurveyDeniedWithoutScope
+     * @return void
+     * 
+     * @group POST
+     * @group Security
+     */
     public function testPostToCreateSurveyDeniedWithoutScope(): void
     {
         $token = ApiTokenFactory::createOne([
@@ -125,19 +149,19 @@ class SurveyResourceTest extends ApiTestCase
         ]);
 
         $this->browser()
-            ->post('/api/surveys', [
-                'json' => [],
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $token->getToken(),
-                ],
-            ])
+            ->use(function (SurveyComponent $surveyComponent) use ($token) {
+                $surveyComponent->postWithToken([], $token->getToken());
+            })
             ->assertStatus(403)
         ;
     }
 
     /**
-     * @todo Make sure the Content-Type issue isn't a bigger problem with
-     * configuration.
+     * Summary of testPatchToUpdateSurvey
+     * @return void
+     * 
+     * @group PATCH
+     * @group Security
      */
     public function testPatchToUpdateSurvey(): void
     {
@@ -146,47 +170,44 @@ class SurveyResourceTest extends ApiTestCase
 
         $this->browser()
             ->actingAs($user)
-            ->patch('/api/surveys/' . $survey->getId(), [
-                'json' => [
-                    'name' => 'A different Name',
-                ],
-                'headers' => [
-                    'Content-Type' => "application/merge-patch+json",
-                ]
-            ])
+            ->use(function (SurveyComponent $surveyComponent) use ($survey) {
+                $surveyComponent->updateSurvey($survey->getId(), [
+                    'name' => 'A different name',
+                ]);
+            })
             ->assertStatus(200)
-            ->assertJsonMatches('name', 'A different Name')
+            ->assertJsonMatches('name', 'A different name')
         ;
 
         $user2 = UserFactory::createOne();
         $this->browser()
             ->actingAs($user2)
-            ->patch('/api/surveys/' . $survey->getId(), [
-                'json' => [
+            ->use(function (SurveyComponent $surveyComponent) use ($survey) {
+                $surveyComponent->updateSurvey($survey->getId(), [
                     'name' => 'A third name',
-                ],
-                'headers' => [
-                    'Content-Type' => "application/merge-patch+json",
-                ]
-            ])
-            ->dump()
+                ]);
+            })
             ->assertStatus(403)
         ;
-        
+
         $this->browser()
             ->actingAs($user)
-            ->patch('/api/surveys/' . $survey->getId(), [
-                'json' => [
+            ->use(function (SurveyComponent $surveyComponent) use ($survey, $user2) {
+                $surveyComponent->updateSurvey($survey->getId(), [
                     'owner' => '/api/users/' . $user2->getId(),
-                ],
-                'headers' => [
-                    'Content-Type' => "application/merge-patch+json",
-                ]
-            ])
+                ]);
+            })
             ->assertStatus(422)
         ;
     }
 
+    /**
+     * Summary of testPatchUnpublishedWorks
+     * @return void
+     * 
+     * @group PATCH
+     * @group Security
+     */
     public function testPatchUnpublishedWorks()
     {
         $user = UserFactory::createOne();
@@ -197,19 +218,24 @@ class SurveyResourceTest extends ApiTestCase
 
         $this->browser()
             ->actingAs($user)
-            ->patch('/api/surveys/' . $survey->getId(), [
-                'json' => [
-                    'name' => 'A different Name',
-                ],
-                'headers' => [
-                    'Content-Type' => "application/merge-patch+json",
-                ]
-            ])
+            ->use(function (SurveyComponent $surveyComponent) use ($survey) {
+                $surveyComponent->updateSurvey($survey->getId(), [
+                    'name' => 'A different name',
+                ]);
+            })
             ->assertStatus(200)
-            ->assertJsonMatches('name', 'A different Name')
+            ->assertJsonMatches('name', 'A different name')
         ;
     }
 
+    /**
+     * Summary of testAdminCanPatchToEditSurvey
+     * @return void
+     * 
+     * @group PATCH
+     * @group Security
+     * @group Admin
+     */
     public function testAdminCanPatchToEditSurvey(): void
     {
         $admin = UserFactory::new()->asAdmin()->create();
@@ -219,20 +245,25 @@ class SurveyResourceTest extends ApiTestCase
 
         $this->browser()
             ->actingAs($admin)
-            ->patch('/api/surveys/' . $survey->getId(), [
-                'json' => [
+            ->use(function (SurveyComponent $surveyComponent) use ($survey) {
+                $surveyComponent->updateSurvey($survey->getId(), [
                     'name' => 'Admin rename',
-                ],
-                'headers' => [
-                    'Content-Type' => "application/merge-patch+json",
-                ]
-            ])
+                ]);
+            })
             ->assertStatus(200)
             ->assertJsonMatches('name', 'Admin rename')
             ->assertJsonMatches('isPublished', true)
         ;
     }
 
+    /**
+     * Summary of testOwnerCanSeeIsPublishedField
+     * @return void
+     * 
+     * @group PATCH
+     * @group Security
+     * @group Owner
+     */
     public function testOwnerCanSeeIsPublishedField(): void
     {
         $user = UserFactory::new()->create();
@@ -243,14 +274,11 @@ class SurveyResourceTest extends ApiTestCase
 
         $this->browser()
             ->actingAs($user)
-            ->patch('/api/surveys/' . $survey->getId(), [
-                'json' => [
+            ->use(function (SurveyComponent $surveyComponent) use ($survey) {
+                $surveyComponent->updateSurvey($survey->getId(), [
                     'name' => 'new name',
-                ],
-                'headers' => [
-                    'Content-Type' => "application/merge-patch+json",
-                ]
-            ])
+                ]);
+            })
             ->assertStatus(200)
             ->assertJsonMatches('name', 'new name')
             ->assertJsonMatches('isPublished', true)
