@@ -23,7 +23,7 @@ class SurveyResourceTest extends ApiTestCase
     use ResetDatabase;
 
     /**
-     * Summary of testGetCollectionOfSurveys
+     * Get a collection of surveys and verify that the right number come back and the format is correct.
      * @return void
      * 
      * @group GET
@@ -63,7 +63,7 @@ class SurveyResourceTest extends ApiTestCase
     }
 
     /**
-     * Summary of testGetOneUnpublishedSurvey404s
+     * Get a 404 from accessing an unpublished survey.
      * @return void
      * 
      * @group GET
