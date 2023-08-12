@@ -12,7 +12,6 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SurveyRepository;
 use App\State\SurveyOwnerProcessor;
-use App\Validator\IsValidOwner;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -80,10 +79,7 @@ class Survey
 
     #[ORM\ManyToOne(inversedBy: 'surveys')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\Valid]
-    #[IsValidOwner]
-    #[Groups(['survey:read', 'survey:write'])]
-    private ?User $owner = null;
+    private ?Publisher $publisher = null;
 
     public function __construct()
     {
@@ -180,14 +176,14 @@ class Survey
         return $this;
     }
 
-    public function getOwner(): ?User
+    public function getPublisher(): ?Publisher
     {
-        return $this->owner;
+        return $this->publisher;
     }
 
-    public function setOwner(?User $owner): static
+    public function setPublisher(?Publisher $publisher): static
     {
-        $this->owner = $owner;
+        $this->publisher = $publisher;
 
         return $this;
     }

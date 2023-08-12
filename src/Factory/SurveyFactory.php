@@ -48,9 +48,9 @@ final class SurveyFactory extends ModelFactory
     {
         return [
             'isPublished' => true,
-            'name' => self::faker()->text(255),
+            'name' => self::faker()->text(30),
             'questions' => [],
-            'owner' => UserFactory::new(),
+            'publisher' => PublisherFactory::createOne(),
         ];
     }
 

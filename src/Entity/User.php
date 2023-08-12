@@ -8,10 +8,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use App\Repository\SurveyRepository;
 use App\Repository\UserRepository;
 use App\State\UserHashPasswordProcessor;
-use App\Validator\SurveysAllowedOwnerChange;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -85,25 +83,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
     private ?string $username = null;
 
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Survey::class)]
-    #[Groups(['user:write'])]
-    #[SurveysAllowedOwnerChange]
-    private Collection $surveys;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: SurveyResponse::class)]
-    #[Groups(['user:read', 'user:write'])]
-    private Collection $surveyResponses;
-
     #[ORM\OneToMany(mappedBy: 'ownedBy', targetEntity: ApiToken::class)]
     private Collection $apiTokens;
 
     #[Groups(['user:login'])]
     private ?string $token = null;
 
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Publisher $publisher = null;
+
     public function __construct()
     {
-        $this->surveys = new ArrayCollection();
-        $this->surveyResponses = new ArrayCollection();
         $this->apiTokens = new ArrayCollection();
     }
 
@@ -197,73 +187,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Survey>
-     */
-    public function getSurveys(): Collection
-    {
-        return $this->surveys;
-    }
-
-    #[Groups(['user:read'])]
-    #[SerializedName('surveys')]
-    public function getPublishedSurveys(): Collection
-    {
-        return $this->surveys->matching(SurveyRepository::createPublishedCriteria());
-    }
-
-    public function addSurvey(Survey $survey): static
-    {
-        if (!$this->surveys->contains($survey)) {
-            $this->surveys->add($survey);
-            $survey->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSurvey(Survey $survey): static
-    {
-        if ($this->surveys->removeElement($survey)) {
-            // set the owning side to null (unless already changed)
-            if ($survey->getOwner() === $this) {
-                $survey->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, SurveyResponse>
-     */
-    public function getSurveyResponses(): Collection
-    {
-        return $this->surveyResponses;
-    }
-
-    public function addSurveyResponse(SurveyResponse $surveyResponse): static
-    {
-        if (!$this->surveyResponses->contains($surveyResponse)) {
-            $this->surveyResponses->add($surveyResponse);
-            $surveyResponse->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSurveyResponse(SurveyResponse $surveyResponse): static
-    {
-        if ($this->surveyResponses->removeElement($surveyResponse)) {
-            // set the owning side to null (unless already changed)
-            if ($surveyResponse->getUser() === $this) {
-                $surveyResponse->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, ApiToken>
      */
     public function getApiTokens(): Collection
@@ -332,5 +255,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
+    }
+
+    public function getPublisher(): ?Publisher
+    {
+        return $this->publisher;
+    }
+
+    public function setPublisher(?Publisher $publisher): static
+    {
+        $this->publisher = $publisher;
+
+        return $this;
     }
 }

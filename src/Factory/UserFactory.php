@@ -58,6 +58,7 @@ final class UserFactory extends ModelFactory
                 SurveyVoter::VIEW,
             ],
             'username' => self::faker()->userName(),
+            'publisher' => PublisherFactory::createOne(),
         ];
     }
 
