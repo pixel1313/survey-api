@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -64,7 +66,8 @@ class Survey
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(['admin:read', 'admin:write', 'owner:read'])]
+    #[Groups(['admin:read', 'admin:write', 'owner:read', 'survey:read'])]
+    #[ApiFilter(BooleanFilter::class)]
     private ?bool $isPublished = false;
 
     #[ORM\OneToMany(mappedBy: 'survey', targetEntity: Question::class, orphanRemoval: true)]
