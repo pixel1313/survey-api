@@ -12,13 +12,17 @@ use App\Repository\PublisherRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PublisherRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['publisher:read']],
     denormalizationContext: ['groups' => ['publisher:write']],
     operations: [
-        new Get(),
+        new Get(
+            normalizationContext: ['gropus' => ['publisher:read', 'publisher:item:get']],
+        ),
         new GetCollection(),
         new Post(),
         new Patch(),
@@ -33,15 +37,26 @@ class Publisher
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['publisher:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['publisher:read', 'publisher:write'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(
+        min: 2,
+        minMessage: 'Publisher name must be at least 2 characters long',
+        max: 255,
+        maxMessage: 'Publisher name must be less than 255 characters'
+    )]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'publisher', targetEntity: Survey::class)]
+    #[Groups(['publisher:item:get', 'publisher:write'])]
     private Collection $surveys;
 
     #[ORM\OneToMany(mappedBy: 'publisher', targetEntity: User::class)]
+    #[Groups(['publisher:item:get', 'publisher:write'])]
     private Collection $users;
 
     public function __construct()
