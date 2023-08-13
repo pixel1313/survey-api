@@ -59,7 +59,6 @@ class SurveyResourceTest extends ApiTestCase
                 $surveyComponent->assertCorrectHydraCollectionFormat(6);
             })
             ->assertJson();
-        ;
     }
 
     /**
