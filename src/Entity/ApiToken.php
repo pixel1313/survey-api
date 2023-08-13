@@ -10,15 +10,40 @@ class ApiToken
 {
     private const PERSONAL_ACCESS_TOKEN_PREFIX = 'tcp_';
 
+    // users
+    public const SCOPE_USER_VIEW = 'ROLE_USER_VIEW';
+    public const SCOPE_USER_CREATE = 'ROLE_USER_CREATE';
     public const SCOPE_USER_EDIT = 'ROLE_USER_EDIT';
+    public const SCOPE_USER_DELETE = 'ROLE_USER_DELETE';
+
+    // publishers
+    public const SCOPE_PUBLISHER_VIEW = 'ROLE_PUBLISHER_VIEW';
+    public const SCOPE_PUBLISHER_CREATE = 'ROLE_PUBLISHER_CREATE';
+    public const SCOPE_PUBLISHER_EDIT = 'ROLE_PUBLISHER_EDIT';
+    public const SCOPE_PUBLISHER_DELETE = 'ROLE_PUBLISHER_DELETE';
+
+    // surveys
     public const SCOPE_SURVEY_VIEW = 'ROLE_SURVEY_VIEW';
     public const SCOPE_SURVEY_CREATE = 'ROLE_SURVEY_CREATE';
     public const SCOPE_SURVEY_EDIT = 'ROLE_SURVEY_EDIT';
+    public const SCOPE_SURVEY_DELETE = 'ROLE_SURVEY_DELETE';
 
     public const SCOPES = [
+        self::SCOPE_USER_VIEW => 'View User',
+        self::SCOPE_USER_CREATE => 'Create User',
         self::SCOPE_USER_EDIT => 'Edit User',
+        self::SCOPE_USER_DELETE => 'Delete User',
+
+        self::SCOPE_SURVEY_VIEW => 'View Survey',
         self::SCOPE_SURVEY_CREATE => 'Create Survey',
         self::SCOPE_SURVEY_EDIT => 'Edit Survey',
+        self::SCOPE_SURVEY_DELETE => 'Delete Survey',
+        
+        self::SCOPE_PUBLISHER_VIEW => 'View Publisher',
+        self::SCOPE_PUBLISHER_CREATE => 'Create Publisher',
+        self::SCOPE_PUBLISHER_EDIT => 'Edit Publisher',
+        self::SCOPE_PUBLISHER_DELETE => 'Delete Publisher',
+        
     ];
 
     #[ORM\Id]
