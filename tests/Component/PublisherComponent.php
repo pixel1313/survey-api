@@ -22,15 +22,12 @@ class PublisherComponent extends Component
         return $this;
     }
 
-    public function getPublisherItem(int $id): self
+    public function getPublisherItemWithToken(int $id, string $token): self
     {
         $this->browser()
-            ->get(self::API_URL . '/' . $id)
-            ->json()
-            ->assertHas('id')
-            ->assertHas('name')
-            ->assertHas('surveys')
-            ->assertHas('users');
+            ->get(self::API_URL . '/' . $id, [
+                'headers' => ['Authorization' => 'Bearer ' . $token],
+            ]);
 
         return $this;
     }
@@ -56,20 +53,6 @@ class PublisherComponent extends Component
                     'Authorization' => 'Bearer ' . $token,
                 ],
             ]);
-
-        return $this;
-    }
-
-    
-
-    public function assertCorrectHydraItemFormat(): self
-    {
-        $this->browser()
-            ->json()
-            ->assertHas('id')
-            ->assertHas('name')
-            ->assertHas('surveys')
-            ->assertHas('users');
 
         return $this;
     }

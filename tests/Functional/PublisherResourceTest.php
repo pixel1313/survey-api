@@ -7,6 +7,7 @@ use App\Factory\ApiTokenFactory;
 use App\Factory\PublisherFactory;
 use App\Factory\UserFactory;
 use App\Tests\Component\PublisherComponent;
+use Zenstruck\Browser\Json;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
 /**
@@ -62,7 +63,7 @@ class PublisherResourceTest extends ApiTestCase
             ->use(function (PublisherComponent $publisherComponent) use ($badToken) {
                 $publisherComponent->getPublisherCollectionWithToken($badToken->getToken());
             })
-            //->assertStatus(403)
+            ->assertStatus(403)
             // test that we only get one and it has the correct format.
             ->use(function (PublisherComponent $publisherComponent) use ($userToken) {
                 $publisherComponent->getPublisherCollectionWithToken($userToken->getToken());
@@ -97,6 +98,7 @@ class PublisherResourceTest extends ApiTestCase
      * @return void
      * 
      * @todo test security.
+     * @todo extract the admin tests to another Test class.
      * 
      * @group GET
      * @group Publisher
@@ -105,10 +107,60 @@ class PublisherResourceTest extends ApiTestCase
     {
         $publisher = PublisherFactory::createOne();
 
+        $badToken = ApiTokenFactory::createOne([
+            'scopes' => [ApiToken::SCOPE_SURVEY_VIEW],
+            'ownedBy' => UserFactory::createOne(['publisher' => PublisherFactory::createOne()]),
+        ]);
+
+        $userToken = ApiTokenFactory::createOne([
+            'scopes' => [ApiToken::SCOPE_PUBLISHER_VIEW],
+            'ownedBy' => UserFactory::createOne(['publisher' => $publisher]),
+        ]);
+
+        
+        // fixtures for admins
+        $adminToken = ApiTokenFactory::createOne([
+            'scopes' => [User::ADMIN],
+            'ownedBy' => UserFactory::createOne(['publisher' => $publisher]),
+        ]);
+
+
         $this->browser()
-            ->use(function (PublisherComponent $publisherComponent) use ($publisher) {
-                $publisherComponent->getPublisherItem($publisher->getId());
-            });
+            // test missing
+            ->use(function (PublisherComponent $publisherComponent) use ($userToken) {
+                $publisherComponent->getPublisherItemWithToken(PublisherFactory::last()->getId() + 1, $userToken->getToken());
+            })
+            ->assertStatus(404)
+            // test bad permissions
+            ->use(function (PublisherComponent $publisherComponent) use ($publisher, $badToken) {
+                $publisherComponent->getPublisherItemWithToken($publisher->getId(), $badToken->getToken());
+            })
+            ->assertStatus(403)
+            // test user permissions
+            ->use(function (PublisherComponent $publisherComponent) use ($publisher, $userToken) {
+                $publisherComponent->getPublisherItemWithToken($publisher->getId(), $userToken->getToken());
+            })
+            ->assertStatus(200)
+            ->use(function (Json $json) {
+                $json
+                    ->assertHas('id')
+                    ->assertHas('name')
+                    ->assertHas('surveys')
+                    ->assertHas('users');    
+            })
+            // test admin permissions
+            ->use(function (PublisherComponent $publisherComponent) use ($publisher, $adminToken) {
+                $publisherComponent->getPublisherItemWithToken($publisher->getId(), $adminToken->getToken());
+            })
+            ->assertStatus(200)
+            ->use(function (Json $json) {
+                $json
+                    ->assertHas('id')
+                    ->assertHas('name')
+                    ->assertHas('surveys')
+                    ->assertHas('users');    
+            })
+        ;
     }
 
     /**
