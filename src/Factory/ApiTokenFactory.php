@@ -47,7 +47,7 @@ final class ApiTokenFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
-            'ownedBy' => UserFactory::new(),
+            'ownedBy' => UserFactory::randomOrCreate(),
             'scopes' => [
                 ApiToken::SCOPE_SURVEY_VIEW,
                 ApiToken::SCOPE_SURVEY_EDIT,
