@@ -53,15 +53,15 @@ class SurveyComponent extends Component
     {
         $this->browser()
             ->assertJson()
-            ->assertJsonMatches('"hydra:totalItems"', 6)
-            ->assertJsonMatches('length("hydra:member")', 6)
+            ->assertJsonMatches('"hydra:totalItems"', $length)
+            ->assertJsonMatches('length("hydra:member")', $length)
             ->assertJsonMatches('keys("hydra:member"[0])', [
                 '@id',
                 '@type',
                 'id',
                 'name',
                 'isPublished',
-                'owner',
+                'publisher',
             ]);
 
         return $this;
