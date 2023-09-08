@@ -7,6 +7,13 @@ You'll need to install PHP, a database (MariaDB, MySQL, or PostgreSQL), git, the
 
 TODO: list basic install instructions and link to more detailed sources.
 
+Install Dependencies
+--------------------
+
+```bash
+composer install
+```
+
 Environment Configuration
 -------------------------
 
