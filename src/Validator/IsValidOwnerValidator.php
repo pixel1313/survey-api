@@ -14,7 +14,7 @@ class IsValidOwnerValidator extends ConstraintValidator
         private Security $security
     ) {}
 
-    public function validate($value, Constraint $constraint)
+    public function validate($value, Constraint $constraint): void
     {
         assert($constraint instanceof IsValidOwner);
 
