@@ -6,6 +6,7 @@ api_platform:
       vary: ['Content-Type', 'Authorization', 'Origin']
     extra_properties:
       standard_put: true
+      rfc_7807_compliant_errors: true
     # end of new from the recipe
     pagination_items_per_page: 25
     pagination_maximum_items_per_page: 50
@@ -20,3 +21,13 @@ api_platform:
       access_token:
         name: Authorization
         type: header
+  # new from recipe 2
+  event_listeners_backward_compatibility_layer: false
+  keep_legacy_inflector: false
+  formats:
+    jsonld: ['application/ld+json']
+  docs_formats:
+    jsonld: ['application/ld+json']
+    jsonopenapi: ['application/vnd.openapi+json']
+    html: ['text/html']
+  # end of new from recipe 2
