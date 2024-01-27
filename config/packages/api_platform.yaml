@@ -1,7 +1,7 @@
 api_platform:
   defaults:
     # new from the reccipe.
-    stateless: true
+    #stateless: true
     cache_headers:
       vary: ['Content-Type', 'Authorization', 'Origin']
     extra_properties:

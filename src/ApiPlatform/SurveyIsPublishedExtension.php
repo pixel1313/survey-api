@@ -38,9 +38,11 @@ class SurveyIsPublishedExtension implements
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $user = $this->security->getUser();
 
+        $publisher = $user->getPublisher();
+
         if($user) {
-            $queryBuilder->andWhere(sprintf('%s.isPublished = :isPublished OR %s.owner = :owner', $rootAlias, $rootAlias))
-                ->setParameter('owner', $user);
+            $queryBuilder->andWhere(sprintf('%s.isPublished = :isPublished OR %s.publisher = :publisher', $rootAlias, $rootAlias))
+                ->setParameter('publisher', $publisher);
         } else {
             $queryBuilder->andWhere(sprintf('%s.isPublished = :isPublished', $rootAlias));
         }
