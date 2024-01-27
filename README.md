@@ -24,6 +24,13 @@ Replace USERNAME and PASSWORD with the correct values.
 DATABASE_URL="mysql://USERNAME:PASSWORD@127.0.0.1:3306/survey-api?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
 ```
 
+If you'll be running the test suite, you will also need to create a `.env.test.local` file to configure the database url.
+Replace USERNAME and PASSWORD with the correct values as usual.
+
+```bash
+DATABASE_URL="mysql://USERNAME:PASSWORD@127.0.0.1:3306/survey-api?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+```
+
 
 Environment Installation
 ------------------------
