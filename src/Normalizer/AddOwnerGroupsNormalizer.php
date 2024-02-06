@@ -20,7 +20,7 @@ class AddOwnerGroupsNormalizer implements NormalizerInterface, SerializerAwareIn
 
     public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
-        if($object instanceof Survey && $this->security->getUser() === $object->getOwner()) {
+        if($object instanceof Survey && $this->security->getUser()->getPublisher() === $object->getPublisher()) {
             $context['groups'][] = 'owner:read';
         }
         
